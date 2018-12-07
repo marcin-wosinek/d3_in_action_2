@@ -28,16 +28,28 @@
         var colorScale = d3. scaleLinear().domain([0, maxImpact]).range(['white', '#75739f']);
 
         d3.select('svg').attr('style', 'height: 500px; width:500px');
-        d3.select('svg').selectAll('circle')
-          .data(incomingData)
+
+        var tweetG = d3.select('svg')
+          .selectAll('g')
+          .data(incomingData, d =>JSON.stringify(d))
           .enter()
+          .append('g')
+          .attr('transform', d => `translate(${timeRamp(d.tweetTime)}, ${(480 - yScale(d.impact))})`);
+
+        tweetG
           .append('circle')
           .attr('r', d=>radiusScale(d.impact))
-          .attr('cx', d => timeRamp(d.tweetTime))
-          .attr('cy', d=> 480-yScale(d.impact))
           .style("fill", d=>colorScale(d.impact))
           .style("stroke", "black")
           .style("stroke-width", "1px");
+
+        tweetG
+          .append('text')
+          .text(d => `${d.user}-${d.tweetTime.getHours()}`);
+
+        var filteredData = incomingData.filter(d=> d.impact>0);
+
+        d3.selectAll('circle').data(filteredData, d => JSON.stringify(d)).exit().remove();
       }
 
       d3.json("tweets.json", (error, data) => {
