@@ -20,7 +20,7 @@
           .attr("class", "cities")
           .html(d => d.label);
 
-        var maxPopulation = d3.max(incomingData, d => parseInt(d.population));
+        var maxPopulation = d3.max(incomingData, d => parseInt(d.values.length));
         var yScale =d3.scaleLinear().domain([0, maxPopulation]).range([0, 460]);
         d3.select('svg').attr('style', 'height: 480px; width:600px');
         d3.select('svg').selectAll('rect')
@@ -28,30 +28,26 @@
           .enter()
           .append('rect')
           .attr('width', 50)
-          .attr('height', d => yScale(parseInt(d.population)))
+          .attr('height', d => yScale(parseInt(d.values.length)))
           .attr('x', (d, i) => i*60)
-          .attr('y', d=> 480-yScale(parseInt(d.population)))
+          .attr('y', d=> 480-yScale(parseInt(d.values.length)))
           .style("fill", "#FE9922")
           .style("stroke", "#9A8B7A")
           .style("stroke-width", "1px");
       }
 
-      d3.csv("cities.csv", (error, data) => {
+      d3.json("tweets.json", (error, data) => {
         if (error) {
           console.error(error);
         } else {
-          dataViz(data);
+          var tweetData = data.tweets;
+          var nestedTweets = d3
+            .nest()
+            .key(d => d.user)
+            .entries(tweetData);
+
+          dataViz(nestedTweets);
         }
-      });
-
-      d3.json("tweets.json", data => {
-        var tweetData = data.tweets;
-        var nestedTweets = d3
-          .nest()
-          .key(d => d.user)
-          .entries(tweetData);
-
-        console.log(nestedTweets);
       });
     </script>
   </body>
