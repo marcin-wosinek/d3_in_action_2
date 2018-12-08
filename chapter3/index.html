@@ -85,11 +85,11 @@
 
           d3.selectAll("g.overallG")
             .select("circle")
-            .each(function(p) {
+            .style('fill', p =>
               p.region == d.region
-                ? d3.select(this).classed("active", true)
-                : d3.select(this).classed("inactive", false);
-            });
+                ? teamColor.darker(.75)
+                : teamColor.brighter(.5)
+            );
 
           this.parentElement.appendChild(this);
         }
