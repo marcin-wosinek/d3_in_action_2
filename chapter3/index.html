@@ -55,13 +55,57 @@
 
         var teamG = d3.selectAll("g.overallG");
 
-        teamG.append("circle").attr("r", 20);
+        teamG
+          .append("circle")
+          .attr("r", 0)
+          .transition()
+          .delay((d, i) => i * 100)
+          .duration(500)
+          .attr("r", 40)
+          .transition()
+          .duration(500)
+          .attr("r", 20);
 
         teamG
           .append("text")
           .style("text-anchor", "middle")
           .attr("y", 30)
           .text(d => d.team);
+
+        teamG.on("mouseover", highlightRegion);
+        teamG.select("text").style('pointer-events', 'none');
+
+        function highlightRegion(d, i) {
+          var teamColor = d3.rgb('#75739f');
+
+          d3.select(this)
+            .select("text")
+            .classed("active", true)
+            .attr("y", 10);
+
+          d3.selectAll("g.overallG")
+            .select("circle")
+            .each(function(p) {
+              p.region == d.region
+                ? d3.select(this).classed("active", true)
+                : d3.select(this).classed("inactive", false);
+            });
+
+          this.parentElement.appendChild(this);
+        }
+
+        teamG.on("mouseout", unHighlight);
+        function unHighlight() {
+          d3.select(this)
+            .select("text")
+            .classed("active", false)
+            .attr("y", 30);
+
+          d3.selectAll("g.overallG")
+            .select("circle")
+            .classed("active", false)
+            .classed("inactive", false);
+        }
 
         const dataKeys = Object.keys(incomingData[0]).filter(
           d => d !== "team" && d !== "region"
@@ -77,6 +121,8 @@
 
           d3.selectAll("g.overallG")
             .select("circle")
+            .transition()
+            .duration(1000)
             .attr("r", d => radiusScale(d[datapoint]));
         }
 
