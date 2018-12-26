@@ -73,10 +73,10 @@
           .text(d => d.team);
 
         teamG.on("mouseover", highlightRegion);
-        teamG.select("text").style('pointer-events', 'none');
+        teamG.select("text").style("pointer-events", "none");
 
         function highlightRegion(d, i) {
-          var teamColor = d3.rgb('#75739f');
+          var teamColor = d3.rgb("#75739f");
 
           d3.select(this)
             .select("text")
@@ -85,10 +85,10 @@
 
           d3.selectAll("g.overallG")
             .select("circle")
-            .style('fill', p =>
+            .style("fill", p =>
               p.region == d.region
-                ? teamColor.darker(.75)
-                : teamColor.brighter(.5)
+                ? teamColor.darker(0.75)
+                : teamColor.brighter(0.5)
             );
 
           this.parentElement.appendChild(this);
@@ -114,21 +114,26 @@
         function buttonClick(datapoint) {
           var maxValue = d3.max(incomingData, d => parseFloat(d[datapoint]));
 
+          var colorQuantize = d3.scaleQuantize()
+            .domain([0, maxValue]).range(colorbrewer.Reds[3]);
+
           var radiusScale = d3
             .scaleLinear()
             .domain([0, maxValue])
             .range([2, 20]);
 
-          var ybRamp = d3.scaleLinear()
+          var ybRamp = d3
+            .scaleLinear()
             .interpolate(d3.interpolateLab)
-            .domain([0, maxValue]).range(['blue', 'yellow']);
+            .domain([0, maxValue])
+            .range(["blue", "yellow"]);
 
           d3.selectAll("g.overallG")
             .select("circle")
             .transition()
             .duration(1000)
             .attr("r", d => radiusScale(d[datapoint]))
-            .style("fill", d => ybRamp(d[datapoint]));
+            .style("fill", d => colorQuantize(d[datapoint]));
         }
 
         d3.select("#controls")
