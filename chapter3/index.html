@@ -119,11 +119,16 @@
             .domain([0, maxValue])
             .range([2, 20]);
 
+          var ybRamp = d3.scaleLinear()
+            .interpolate(d3.interpolateLab)
+            .domain([0, maxValue]).range(['blue', 'yellow']);
+
           d3.selectAll("g.overallG")
             .select("circle")
             .transition()
             .duration(1000)
-            .attr("r", d => radiusScale(d[datapoint]));
+            .attr("r", d => radiusScale(d[datapoint]))
+            .style("fill", d => ybRamp(d[datapoint]));
         }
 
         d3.select("#controls")
