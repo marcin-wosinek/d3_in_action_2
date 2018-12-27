@@ -67,10 +67,9 @@
       d3.html("../resources/icon.svg", loadSVG);
 
       function loadSVG(svgData) {
-        while (!d3.select(svgData).selectAll('path').empty()) {
-          d3.select('svg').node().appendChild(
-              d3.select(svgData).select('path').node());
-        }
+        d3.select(svgData).selectAll('path').each(function () {
+          d3.select('svg').node().appendChild(this);
+        });
 
         d3.selectAll('path').attr('transform', 'translate(50, 50)');
       }
