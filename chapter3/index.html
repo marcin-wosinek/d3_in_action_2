@@ -62,9 +62,9 @@
 
       d3.csv("../data/worldcup.csv", data => {
         overallTeamViz(data);
-      });
 
-      d3.html("../resources/icon.svg", loadSVG);
+        d3.html("../resources/icon.svg", loadSVG);
+      });
 
       function loadSVG(svgData) {
         d3.selectAll('g').each(function() {
@@ -74,7 +74,15 @@
             gParent.appendChild(this.cloneNode(true));
           });
 
-          d3.selectAll('path').style('fill', '#93c464').style('stroke', 'black').style('stroke-width', '1px');
+          var fourColorScale = d3.scaleOrdinal()
+            .domain(['UEFA', 'CONMEBOL', 'CAF', 'AFC'])
+            .range(['#5eafc6', '#fe9922', '#93c464', '#fcbc34']);
+
+          d3.selectAll('g.overallG').each(function (d) {
+            d3.select(this).selectAll('path').datum(d);
+            d3.select(this).selectAll('path').style('fill', d => fourColorScale(d.region)).style('stroke', 'black').style('stroke-width', '2px');
+          });
+
         });
       }
 
@@ -102,11 +110,6 @@
           .transition()
           .duration(500)
           .attr("r", 20);
-
-        teamG.insert('image', 'text')
-          .attr('xlink:href', d => `../images/${d.team}.png`)
-          .attr('width', '45px').attr('height', '20px')
-          .attr('x', -22).attr('y', -10);
 
         teamG
           .append("text")
