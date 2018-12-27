@@ -64,6 +64,17 @@
         overallTeamViz(data);
       });
 
+      d3.html("../resources/icon.svg", loadSVG);
+
+      function loadSVG(svgData) {
+        while (!d3.select(svgData).selectAll('path').empty()) {
+          d3.select('svg').node().appendChild(
+              d3.select(svgData).select('path').node());
+        }
+
+        d3.selectAll('path').attr('transform', 'translate(50, 50)');
+      }
+
       function overallTeamViz(incomingData) {
         d3.select("svg")
           .append("g")
@@ -133,6 +144,12 @@
             .select("circle")
             .classed("active", false)
             .classed("inactive", false);
+        }
+
+        teamG.on("click", teamClick);
+
+        function teamClick (d) {
+          d3.selectAll('td.data').data(d3.values(d)).html(p=>p);
         }
 
         const dataKeys = Object.keys(incomingData[0]).filter(
