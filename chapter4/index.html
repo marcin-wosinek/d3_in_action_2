@@ -18,12 +18,14 @@
         const xScale = d3
             .scaleLinear()
             .domain([1, 8])
-            .range([20, tickSize]),
-          yScale = d3
+            .range([20, tickSize]);
+
+        const  yScale = d3
             .scaleLinear()
             .domain([0, 100])
-            .range([tickSize + 10, 20]),
-          yAxis = d3
+            .range([tickSize + 10, 20]);
+
+        const yAxis = d3
             .axisRight()
             .scale(yScale)
             .ticks(8)
@@ -48,15 +50,30 @@
           .call(xAxis);
 
         d3.select("svg")
-          .selectAll("circle.median")
+          .selectAll("g.box")
           .data(data)
           .enter()
-          .append("circle")
-          .attr("class", "tweets")
-          .attr("r", 5)
-          .attr("cx", d => xScale(d.day))
-          .attr("cy", d => yScale(d.median))
-          .style("fill", "darkgray");
+          .append("g")
+          .attr("class", "box")
+          .attr(
+            "transform",
+            d => `translate(${xScale(d.day)}, ${yScale(d.median)})`
+          )
+          .each(function(d, i) {
+            d3.select(this)
+              .append("rect")
+              .attr("width", 20)
+              .attr('x', -10)
+              .attr("y", yScale(d.q3) - yScale(d.median))
+              .attr("height", yScale(d.q1) - yScale(d.q3))
+              .style('fill', 'white')
+              .style('stroke', 'black');
+
+            d3.select(this)
+              .append("circle")
+              .attr('r', 5)
+              .style('fill', 'blue');
+          });
       }
     </script>
   </body>
