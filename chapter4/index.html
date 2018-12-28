@@ -1,11 +1,12 @@
-<!doctype html>
+<!doctype HTML>
 <html>
   <head>
+    <meta charset="UTF-8" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.8/d3.min.js" type="text/JavaScript"></script>
   </head>
   <body>
     <div id="viz">
-      <svg style="width:500px;height:500px;" ></svg>
+      <svg style="width:520px;height:520px;" ></svg>
     </div>
     <script>
       var scatterData = [
@@ -17,8 +18,8 @@
         {friends: 8, salary: 74000}
       ];
 
-      var xExtend = d3.extent(scatterData, d => d.salary);
-      var yExtend = d3.extent(scatterData, d => d.friends);
+      var xExtend = [0, 180000];
+      var yExtend = [0, 27];
       var xScale = d3.scaleLinear().domain(xExtend).range([0, 500]);
       var yScale = d3.scaleLinear().domain(yExtend).range([0, 500]);
 
@@ -28,6 +29,15 @@
           .attr("r", 5)
           .attr("cx", (d,i) => xScale(d.salary))
           .attr("cy", d => yScale(d.friends));
+
+      var yAxis = d3.axisRight().scale(yScale).tickSize(500).ticks(16);
+      d3.select('svg').append('g').attr('id', 'yAxisG').call(yAxis);
+
+      var xAxis = d3.axisBottom().scale(xScale).tickSize(500).ticks(4);
+      d3.select('svg').append('g').attr('id', 'xAxisG').call(xAxis);
+
+      //d3.selectAll('#xAxisG').attr('transform', 'translate(0, 500)');
+      //d3.selectAll('#yAxisG').attr('transform', 'translate(500, 0)');
     </script>
   </body>
 </html>
