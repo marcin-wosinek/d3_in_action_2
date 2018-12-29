@@ -19,27 +19,27 @@
             .range([20, 470]),
           yScale = d3
             .scaleLinear()
-            .domain([0, 40])
+            .domain([-40, 40])
             .range([480, 20]);
 
         Object.keys(data[0]).forEach(key => {
           if (key != "day") {
             const movieArea = d3
-              .line()
+              .area()
               .x(d => xScale(d.day))
-              .y(d => yScale(d[key]))
+              .y0(d => yScale(d[key]))
+              .y1(d => yScale(-d[key]))
               .curve(d3.curveCardinal);
-
-          console.log('test', key);
 
             d3.select("svg")
               .append("path")
               .style("id", key + "Area")
               .attr('d', movieArea(data))
-              .attr("fill", "none")
+              .attr("fill", "#75739F")
               .attr("stroke", "#75739F")
               .attr("stroke-width", 3)
-              .style("opacity", 0.75);
+              .style("opacity", 0.75)
+              .style("fill-opacity", 0.5);
           }
         });
       }
