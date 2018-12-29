@@ -73,8 +73,14 @@
         d3.select("svg").append("g").attr("id", "yAxisG").call(yAxis);
 
         var legendA = d3.legendColor().scale(fillScale);
-        d3.select('svg').style('width', 1000);
-        d3.select('svg').append('g').attr('transform', 'translate(500, 0)').call(legendA);
+
+        legendA.orient('horizontal')
+          .shapePadding(60)
+          .shapeWidth(12)
+          .shapeHeight(30);
+
+        d3.select('svg').style('height', 1000);
+        d3.select('svg').append('g').attr('transform', 'translate(50, 500)').call(legendA);
 
         function simpleStacking(lineData, lineKey) {
           var newHeight = 0;
