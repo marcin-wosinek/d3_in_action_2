@@ -38,13 +38,40 @@
           .key(d => d.user)
           .entries(tweetsData);
 
-        nestedTweets.forEach(d => {
+        nestedTweets.forEach((d, i) => {
           d.numTweets = d.values.length;
           d.numFavorites = d3.sum(d.values, p => p.favorites.length);
           d.numRetweets = d3.sum(d.values, p => p.retweets.length);
         });
 
-        let yourPie = pieChart(nestedTweets);
+        let tweetsPie = pieChart(nestedTweets);
+
+        pieChart.value(d => d.numRetweets);
+
+        let retweetsPie = pieChart(nestedTweets);
+
+        nestedTweets.forEach((d, i) => {
+          d.tweetsSlice = tweetsPie[i];
+          d.retweetsSlice = retweetsPie[i];
+        });
+
+        function arcTween(d) {
+          return t => {
+            const interpolateStartAngle = d3.interpolate(
+                d.tweetsSlice.startAngle,
+                d.retweetsSlice.startAngle
+              ),
+              interpolateEndAngle = d3.interpolate(
+                d.tweetsSlice.endAngle,
+                d.retweetsSlice.endAngle
+              );
+
+            d.startAngle = interpolateStartAngle(t);
+            d.endAngle = interpolateEndAngle(t);
+
+            return newArc(d);
+          };
+        }
 
         newArc.innerRadius(20).outerRadius(100);
 
@@ -56,31 +83,20 @@
           .append("g")
           .attr("transform", "translate(200, 200)")
           .selectAll("path")
-          .data(yourPie)
+          .data(nestedTweets)
           .enter()
           .append("path")
-          .attr("d", newArc)
+          .attr("d", d => newArc(d.tweetsSlice))
           .style("fill", (d, i) => fillScale(i))
           .style("stroke", "black")
           .style("stroke-width", "2px");
 
-        window.pieChart = pieChart;
-
-        pieChart.value(d => d.numFavorites);
         d3.selectAll("path")
-          .data(pieChart(nestedTweets))
+          .data(nestedTweets)
           .transition()
           .delay(1000)
           .duration(1000)
-          .attr("d", newArc);
-
-        pieChart.value(d => d.numRetweets);
-        d3.selectAll("path")
-          .data(pieChart(nestedTweets))
-          .transition()
-          .delay(3000)
-          .duration(1000)
-          .attr("d", newArc);
+          .attrTween("d", arcTween);
       }
     </script>
   </body>
