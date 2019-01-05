@@ -28,25 +28,44 @@
       let pieChart = d3.pie(),
         newArc = d3.arc();
 
-      let yourPie = pieChart([1, 1, 2]);
+      pieChart.value(d => d.numTweets);
 
-      newArc.innerRadius(0).outerRadius(100);
+      d3.json("../data/tweets.json", data =>
+        drawChart(data.tweets)
+      );
 
-      let fillScale = d3
-        .scaleOrdinal()
-        .range(["#fcd88a", "#cf7c1c", "#93c464", "#75734f"]);
+      function drawChart(tweetsData) {
+        var nestedTweets = d3
+          .nest()
+          .key(d => d.user)
+          .entries(tweetsData);
 
-      d3.select("svg")
-        .append("g")
-        .attr("transform", "translate(200, 200)")
-        .selectAll("path")
-        .data(yourPie)
-        .enter()
-        .append("path")
-        .attr("d", newArc)
-        .style("fill", (d, i) => fillScale(i))
-        .style("stroke", "black")
-        .style("stroke-width", "2px");
+        nestedTweets.forEach(d => {
+          d.numTweets = d.values.length;
+          d.numFavorites = d3.sum(d.values, p => p.favorites.length);
+          d.numRetweets = d3.sum(d.values, p => p.retweets.length);
+        });
+
+        let yourPie = pieChart(nestedTweets);
+
+        newArc.innerRadius(20).outerRadius(100);
+
+        let fillScale = d3
+          .scaleOrdinal()
+          .range(["#fcd88a", "#cf7c1c", "#93c464", "#75734f"]);
+
+        d3.select("svg")
+          .append("g")
+          .attr("transform", "translate(200, 200)")
+          .selectAll("path")
+          .data(yourPie)
+          .enter()
+          .append("path")
+          .attr("d", newArc)
+          .style("fill", (d, i) => fillScale(i))
+          .style("stroke", "black")
+          .style("stroke-width", "2px");
+      }
     </script>
   </body>
 </html>
