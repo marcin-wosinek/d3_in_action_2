@@ -25,14 +25,12 @@
   <body>
     <div id="viz"><svg style="width:600px;height:600px;"></svg></div>
     <script>
-      let pieChart = d3.pie(),
+      let pieChart = d3.pie().sort(null),
         newArc = d3.arc();
 
       pieChart.value(d => d.numTweets);
 
-      d3.json("../data/tweets.json", data =>
-        drawChart(data.tweets)
-      );
+      d3.json("../data/tweets.json", data => drawChart(data.tweets));
 
       function drawChart(tweetsData) {
         var nestedTweets = d3
@@ -65,6 +63,24 @@
           .style("fill", (d, i) => fillScale(i))
           .style("stroke", "black")
           .style("stroke-width", "2px");
+
+        window.pieChart = pieChart;
+
+        pieChart.value(d => d.numFavorites);
+        d3.selectAll("path")
+          .data(pieChart(nestedTweets))
+          .transition()
+          .delay(1000)
+          .duration(1000)
+          .attr("d", newArc);
+
+        pieChart.value(d => d.numRetweets);
+        d3.selectAll("path")
+          .data(pieChart(nestedTweets))
+          .transition()
+          .delay(3000)
+          .duration(1000)
+          .attr("d", newArc);
       }
     </script>
   </body>
