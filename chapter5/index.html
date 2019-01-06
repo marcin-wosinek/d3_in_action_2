@@ -21,8 +21,11 @@
           .nodePadding(200)
           .size([460, 460])
           .nodes(data.nodes)
-          .links(data.links)
-          .layout(200);
+          .links(data.links);
+
+        var numLayouts = 1;
+
+        sankey.layout(numLayouts);
 
         var intensityRamp = d3
           .scaleLinear()
@@ -54,29 +57,49 @@
           });
 
         d3.select("#sankeyG")
-          .selectAll('.node')
+          .selectAll(".node")
           .data(data.nodes)
           .enter()
-          .append('g')
-          .attr('class', 'node')
-          .attr('transform', d => `translate(${d.x}, ${d.y})`);
+          .append("g")
+          .attr("class", "node")
+          .attr("transform", d => `translate(${d.x}, ${d.y})`);
 
         d3.select("#sankeyG")
-          .selectAll('.node')
-          .append('circle')
-          .attr('height', d => d.dy)
-          .attr('r', d => d.dy/2)
-          .attr('cy', d => d.dy/2)
-          .style('fill', '#94c464');
+          .selectAll(".node")
+          .append("circle")
+          .attr("height", d => d.dy)
+          .attr("r", d => d.dy / 2)
+          .attr("cy", d => d.dy / 2)
+          .style("fill", "#94c464");
 
         d3.select("#sankeyG")
-          .selectAll('.node')
-          .append('text')
-          .attr('x', 0)
-          .attr('y', d => d.dy/2)
-          .attr('text-anchor', 'middle')
-          .style('fill', 'black')
+          .selectAll(".node")
+          .append("text")
+          .attr("x", 0)
+          .attr("y", d => d.dy / 2)
+          .attr("text-anchor", "middle")
+          .style("fill", "black")
           .text(d => d.name);
+
+        d3.select("svg").on("click", runMoreLayouts);
+
+        function runMoreLayouts() {
+          numLayouts += 20;
+
+          sankey.layout(numLayouts);
+
+          d3.select("#sankeyG")
+            .selectAll(".link")
+            .transition()
+            .duration(500)
+            .attr("d", sankey.link());
+
+          d3.select("#sankeyG")
+            .selectAll(".node")
+            .transition()
+            .duration(500)
+            .attr("transform", d => `translate(${d.x}, ${d.y})`);
+        }
       }
     </script>
   </body>
