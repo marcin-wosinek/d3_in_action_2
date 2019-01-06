@@ -25,78 +25,54 @@
   <body>
     <div id="viz"><svg style="width:600px;height:600px;"></svg></div>
     <script>
-      let pieChart = d3.pie().sort(null),
-        newArc = d3.arc();
+      d3.csv("../data/movies.csv", drawChart);
 
-      pieChart.value(d => d.numTweets);
+      function drawChart(data) {
+        let xScale = d3
+          .scaleLinear()
+          .domain([0, 10])
+          .range([0, 500]);
+        let yScale = d3
+          .scaleLinear()
+          .domain([0, 100])
+          .range([500, 0]);
 
-      d3.json("../data/tweets.json", data => drawChart(data.tweets));
+        let movies = [
+          "titanic",
+          "avatar",
+          "akira",
+          "frozen",
+          "deliverance",
+          "avengers"
+        ];
 
-      function drawChart(tweetsData) {
-        var nestedTweets = d3
-          .nest()
-          .key(d => d.user)
-          .entries(tweetsData);
-
-        nestedTweets.forEach((d, i) => {
-          d.numTweets = d.values.length;
-          d.numFavorites = d3.sum(d.values, p => p.favorites.length);
-          d.numRetweets = d3.sum(d.values, p => p.retweets.length);
-        });
-
-        let tweetsPie = pieChart(nestedTweets);
-
-        pieChart.value(d => d.numRetweets);
-
-        let retweetsPie = pieChart(nestedTweets);
-
-        nestedTweets.forEach((d, i) => {
-          d.tweetsSlice = tweetsPie[i];
-          d.retweetsSlice = retweetsPie[i];
-        });
-
-        function arcTween(d) {
-          return t => {
-            const interpolateStartAngle = d3.interpolate(
-                d.tweetsSlice.startAngle,
-                d.retweetsSlice.startAngle
-              ),
-              interpolateEndAngle = d3.interpolate(
-                d.tweetsSlice.endAngle,
-                d.retweetsSlice.endAngle
-              );
-
-            d.startAngle = interpolateStartAngle(t);
-            d.endAngle = interpolateEndAngle(t);
-
-            return newArc(d);
-          };
-        }
-
-        newArc.innerRadius(20).outerRadius(100);
-
-        let fillScale = d3
+        var fillScale = d3
           .scaleOrdinal()
-          .range(["#fcd88a", "#cf7c1c", "#93c464", "#75734f"]);
+          .domain(movies)
+          .range([
+            "#fcd88a",
+            "#cf7c1c",
+            "#93c464",
+            "#75734F",
+            "#5eafc6",
+            "#41a368"
+          ]);
+
+        let stackLayout = d3.stack().keys(movies);
+
+        var stackArea = d3
+          .area()
+          .x((d, i) => xScale(i))
+          .y0(d => yScale(d[0]))
+          .y1(d => yScale(d[1]));
 
         d3.select("svg")
-          .append("g")
-          .attr("transform", "translate(200, 200)")
           .selectAll("path")
-          .data(nestedTweets)
+          .data(stackLayout(data))
           .enter()
           .append("path")
-          .attr("d", d => newArc(d.tweetsSlice))
-          .style("fill", (d, i) => fillScale(i))
-          .style("stroke", "black")
-          .style("stroke-width", "2px");
-
-        d3.selectAll("path")
-          .data(nestedTweets)
-          .transition()
-          .delay(1000)
-          .duration(1000)
-          .attrTween("d", arcTween);
+          .style("fill", d => fillScale(d.key))
+          .attr("d", d => stackArea(d));
       }
     </script>
   </body>
