@@ -29,35 +29,15 @@
 
       function drawChart(data) {
         let xScale = d3
-            .scaleLinear()
-            .domain([0, 10])
-            .range([0, 500]),
-          xAxis = d3
-            .axisBottom()
-            .scale(xScale)
-            .tickSize(510);
-
-        d3.select("svg")
-          .append("g")
-          .call(xAxis);
-
-        let yScale = d3
-            .scaleLinear()
-            .domain([0, 60])
-            .range([480, 0]),
-          yAxis = d3
-            .axisRight()
-            .scale(yScale)
-            .tickSize(530);
-
-        d3.select("svg")
-          .append("g")
-          .call(yAxis);
-
-        let heightScale = d3
           .scaleLinear()
-          .domain([0, 60])
-          .range([0, 480]);
+          .domain([0, 10])
+          .range([0, 500]);
+        let yScale = d3
+          .scaleLinear()
+          .domain([-50, 50])
+          .range([500, 0]);
+
+        //let heightScale = d3.scaleLinear().domain([0, 60]).range([0, 480]);
 
         let movies = [
           "titanic",
@@ -80,26 +60,22 @@
             "#41a368"
           ]);
 
-        let stackLayout = d3.stack().keys(movies);
+        let stackLayout = d3.stack().keys(movies).offset(d3.stackOffsetSilhouette).order(d3.stackOrderInsideOut);
+
+        var stackArea = d3
+          .area()
+          .curve(d3.curveBasis)
+          .x((d, i) => xScale(i))
+          .y0(d => yScale(d[0]))
+          .y1(d => yScale(d[1]));
 
         d3.select("svg")
-          .selectAll("g.bar")
+          .selectAll("path")
           .data(stackLayout(data))
           .enter()
-          .append("g")
-          .attr("class", "bar")
-          .each(function(d) {
-            d3.select(this)
-              .selectAll("rect")
-              .data(d)
-              .enter()
-              .append("rect")
-              .attr("x", (p, q) => xScale(q) + 30)
-              .attr("y", p => yScale(p[1]))
-              .attr("height", p => heightScale(p[1] - p[0]))
-              .attr("width", 40)
-              .style("fill", fillScale(d.key));
-          });
+          .append("path")
+          .style("fill", d => fillScale(d.key))
+          .attr("d", d => stackArea(d));
       }
     </script>
   </body>
