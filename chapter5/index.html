@@ -21,14 +21,12 @@
           .domain([0, 75])
           .range([10, 120]);
 
-        randomRotate = d3.scaleLinear().domain([0, 1]).range([-20, 20]);
-
-        //var keywords = ["layout", "zoom", "circle", "style", "append", "attr"];
+        var keywords = ["layout", "zoom", "circle", "style", "append", "attr"];
 
         d3.cloud()
           .size([500, 500])
           .words(data)
-          .rotate(() => randomRotate(Math.random()))
+          .rotate(d => d.text.length > 5 ? 0 : 90)
           .fontSize(d => wordScale(d.frequency))
           .on("end", draw)
           .start();
@@ -46,7 +44,7 @@
             .enter()
             .append("text")
             .style("font-size", d => d.size + "px")
-            .style("fill", "#4f442b")
+            .style("fill", d => keywords.indexOf(d.text) > -1 ? "#fe9922" : "#4f442b")
             .attr("text-anchor", "middle")
             .attr(
               "transform",
