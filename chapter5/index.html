@@ -34,8 +34,10 @@
           .range([0, 500]);
         let yScale = d3
           .scaleLinear()
-          .domain([0, 100])
+          .domain([-50, 50])
           .range([500, 0]);
+
+        //let heightScale = d3.scaleLinear().domain([0, 60]).range([0, 480]);
 
         let movies = [
           "titanic",
@@ -58,10 +60,11 @@
             "#41a368"
           ]);
 
-        let stackLayout = d3.stack().keys(movies);
+        let stackLayout = d3.stack().keys(movies).offset(d3.stackOffsetSilhouette).order(d3.stackOrderInsideOut);
 
         var stackArea = d3
           .area()
+          .curve(d3.curveBasis)
           .x((d, i) => xScale(i))
           .y0(d => yScale(d[0]))
           .y1(d => yScale(d[1]));
