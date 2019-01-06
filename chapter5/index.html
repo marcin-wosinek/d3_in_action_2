@@ -21,10 +21,14 @@
           .domain([0, 75])
           .range([10, 120]);
 
+        randomRotate = d3.scaleLinear().domain([0, 1]).range([-20, 20]);
+
+        //var keywords = ["layout", "zoom", "circle", "style", "append", "attr"];
+
         d3.cloud()
           .size([500, 500])
           .words(data)
-          .rotate(0)
+          .rotate(() => randomRotate(Math.random()))
           .fontSize(d => wordScale(d.frequency))
           .on("end", draw)
           .start();
