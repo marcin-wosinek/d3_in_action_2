@@ -17,7 +17,7 @@
       function sankeyViz(data) {
         let sankey = d3
           .sankey()
-          .nodeWidth(20)
+          .nodeWidth(0)
           .nodePadding(200)
           .size([460, 460])
           .nodes(data.nodes)
@@ -63,11 +63,11 @@
 
         d3.select("#sankeyG")
           .selectAll('.node')
-          .append('rect')
+          .append('circle')
           .attr('height', d => d.dy)
-          .attr('width', 20)
-          .style('fill', '#94c464')
-          .style('stroke', 'gray')
+          .attr('r', d => d.dy/2)
+          .attr('cy', d => d.dy/2)
+          .style('fill', '#94c464');
 
         d3.select("#sankeyG")
           .selectAll('.node')
