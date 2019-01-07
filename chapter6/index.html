@@ -27,7 +27,7 @@
         var packableTweets = { id: "All Tweets", values: nestedTweets };
         var packChart = d3.pack();
 
-        packChart.size([500, 500]);
+        packChart.size([500, 500]).padding(10);
 
         var root = d3.hierarchy(packableTweets, d => d.values).sum(() => 1);
 
