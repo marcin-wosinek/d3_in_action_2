@@ -27,21 +27,42 @@
         var packableTweets = { id: "All Tweets", values: nestedTweets };
         var packChart = d3.pack();
 
-        packChart.size([500, 500]).padding(10);
+        var root = d3
+          .hierarchy(packableTweets, d => d.values)
+          .sum(d => d.values);
 
-        var root = d3.hierarchy(packableTweets, d => d.values).sum(() => 1);
+        var treeChart = d3.tree();
+        treeChart.size([500, 500]);
+
+        var treeData = treeChart(root).descendants();
 
         d3.select("svg")
           .append("g")
-          .attr("transform", "translate(100,20)")
-          .selectAll("circle")
-          .data(packChart(root).descendants())
+          .attr("id", "treeG")
+          .attr("transform", "translate(60,20)")
+          .selectAll("g")
+          .data(treeData)
           .enter()
+          .append("g")
+          .attr("class", "node")
+          .attr("transform", d => `translate(${d.x}, ${d.y})`);
+
+        d3.selectAll("g.node")
           .append("circle")
-          .attr("r", d => d.r)
-          .attr("cx", d => d.x)
-          .attr("cy", d => d.y)
+          .attr("r", 10)
           .style("fill", d => depthScale(d.depth))
+          .style("stroke", "white")
+          .style("stroke-width", "2px");
+
+        d3.select("#treeG")
+          .selectAll("line")
+          .data(treeData.filter(d => d.parent))
+          .enter()
+          .insert("line", "g")
+          .attr("x1", d => d.parent.x)
+          .attr("y1", d => d.parent.y)
+          .attr("x2", d => d.x)
+          .attr("y2", d => d.y)
           .style("stroke", "black");
       }
     </script>
