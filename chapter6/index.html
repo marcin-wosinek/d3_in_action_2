@@ -51,7 +51,50 @@
           .attr("width", d => d.x1 - d.x0)
           .attr("height", d => d.y1 - d.y0)
           .style("fill", d => depthScale(d.depth))
-          .style("stroke", "black");
+          .style("stroke", "black")
+          .on("click", filterTreemap);
+
+        function filterTreemap(d) {
+          var newRoot = d3
+            .hierarchy(d.data, p => p.values)
+            .sum(p =>
+              p.retweets
+                ? p.retweets.length + p.favorites.length + 1
+                : undefined
+            );
+
+          treemapLayout(newRoot);
+
+          d3.select("svg")
+            .selectAll("rect")
+            .data(
+              newRoot.descendants(),
+              p => p.data.content || p.data.user || p.data.key
+            )
+            .enter()
+            .append("rect")
+            .style("fill", d => depthScale(d.depth))
+            .style("stroke", "black");
+
+          d3.select("svg")
+            .selectAll("rect")
+            .data(
+              newRoot.descendants(),
+              p => p.data.content || p.data.user || p.data.key
+            )
+            .exit()
+            .remove();
+
+          d3.select("svg")
+            .selectAll("rect")
+            .on('click', d===root ? p=>filterTreemap(p):() =>filterTreemap(root))
+            .transition()
+            .duration(1000)
+          .attr("x", d => d.x0)
+          .attr("y", d => d.y0)
+          .attr("width", d => d.x1 - d.x0)
+          .attr("height", d => d.y1 - d.y0);
+        }
       }
     </script>
   </body>
