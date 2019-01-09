@@ -10,7 +10,7 @@
     <style></style>
   </head>
   <body>
-    <div id="viz"><svg style="width:800px;height:600px;"></svg></div>
+    <div id="viz"><svg style="width:600px;height:600px;"></svg></div>
     <script>
       d3.json("../data/tweets.json", viz);
 
@@ -70,6 +70,15 @@
           .attr("x2", d => d.y)
           .attr("y2", d => d.x)
           .style("stroke", "black");
+
+        function zoomed() {
+          d3.select('#treeG').attr('transform', `translate(${d3.event.transform.x}, ${d3.event.transform.y})`);
+        }
+
+        treeZoom = d3.zoom();
+
+        treeZoom.on('zoom', zoomed);
+        d3.select('svg').call(treeZoom);
       }
     </script>
   </body>
