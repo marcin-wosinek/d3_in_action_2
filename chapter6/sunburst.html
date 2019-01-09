@@ -25,31 +25,28 @@
           .entries(data.tweets);
 
         var packableTweets = { id: "All Tweets", values: nestedTweets };
+        var packChart = d3.pack();
+
         var root = d3
           .hierarchy(packableTweets, d => d.values)
           .sum(d =>
             d.retweets ? d.retweets.length + d.favorites.length + 1 : undefined
           );
 
-        let treemapLayout = d3
-          .treemap()
-          .size([500, 500])
-          .padding(d => d.depth * 5 + 5);
+        var partitionLayout = d3.partition().size([2 * Math.PI, 250]);
 
-        treemapLayout(root);
+        partitionLayout(root);
+
+        let arc = d3.arc().innerRadius(d=>d.y0).outerRadius(d=>d.y1);
 
         d3.select("svg")
-          .selectAll("rect")
-          .data(
-            root.descendants(),
-            d => d.data.content || d.data.user || d.data.key
-          )
+          .append('g')
+          .attr('transform', 'translate(250, 250)')
+          .selectAll("path")
+          .data(root.descendants())
           .enter()
-          .append("rect")
-          .attr("x", d => d.x0)
-          .attr("y", d => d.y0)
-          .attr("width", d => d.x1 - d.x0)
-          .attr("height", d => d.y1 - d.y0)
+          .append("path")
+          .attr("d", ({y0, y1, x0, x1}) => arc({y0, y1, startAngle: x0, endAngle: x1}))
           .style("fill", d => depthScale(d.depth))
           .style("stroke", "black");
       }
