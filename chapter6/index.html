@@ -10,7 +10,7 @@
     <style></style>
   </head>
   <body>
-    <div id="viz"><svg style="width:600px;height:600px;"></svg></div>
+    <div id="viz"><svg style="width:800px;height:600px;"></svg></div>
     <script>
       d3.json("../data/tweets.json", viz);
 
@@ -45,7 +45,7 @@
           .enter()
           .append("g")
           .attr("class", "node")
-          .attr("transform", d => `translate(${d.x}, ${d.y})`);
+          .attr("transform", d => `translate(${d.y}, ${d.x})`);
 
         d3.selectAll("g.node")
           .append("circle")
@@ -54,15 +54,21 @@
           .style("stroke", "white")
           .style("stroke-width", "2px");
 
+        d3.selectAll("g.node")
+          .append("text")
+          .style("text-anchor", "middle")
+          .style("fill", "#4f442b")
+          .text(d => d.data.id || d.data.key || d.data.content);
+
         d3.select("#treeG")
           .selectAll("line")
           .data(treeData.filter(d => d.parent))
           .enter()
           .insert("line", "g")
-          .attr("x1", d => d.parent.x)
-          .attr("y1", d => d.parent.y)
-          .attr("x2", d => d.x)
-          .attr("y2", d => d.y)
+          .attr("x1", d => d.parent.y)
+          .attr("y1", d => d.parent.x)
+          .attr("x2", d => d.y)
+          .attr("y2", d => d.x)
           .style("stroke", "black");
       }
     </script>
