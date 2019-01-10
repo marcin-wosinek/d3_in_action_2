@@ -108,9 +108,13 @@
           .text(d => d.id)
           .style("text-anchor", "end");
 
-        d3.selectAll('rect.grid').on('mouseover',gridOver);
+        d3.selectAll("rect.grid").on("mouseover", gridOver);
         function gridOver(d) {
-          d3.selectAll('rect').style('stroke-width', p=>p.x==d.x||p.y==d.y? '4px':'1px');
+          d3.selectAll("rect").style("stroke-width", p =>
+            p.x == d.x || p.y == d.y || (p.x == d.y && p.y == d.x)
+              ? "4px"
+              : "1px"
+          );
         }
       }
     </script>
