@@ -107,6 +107,11 @@
           .attr("y", (d, i) => i * 25 + 12.5)
           .text(d => d.id)
           .style("text-anchor", "end");
+
+        d3.selectAll('rect.grid').on('mouseover',gridOver);
+        function gridOver(d) {
+          d3.selectAll('rect').style('stroke-width', p=>p.x==d.x||p.y==d.y? '4px':'1px');
+        }
       }
     </script>
   </body>
