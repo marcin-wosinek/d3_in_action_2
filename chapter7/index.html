@@ -31,6 +31,12 @@
       path.active {
         stroke: #fe9922;
       }
+      circle.source {
+        fill: #93C464;
+      }
+      circle.target {
+        fill: #41A368;
+      }
     </style>
   </head>
   <body>
@@ -80,7 +86,7 @@
           .data(edges)
           .enter()
           .append("path")
-            .attr("class", "arc")
+          .attr("class", "arc")
           .style("stroke-width", d => d.weight * 2)
           .style("opacity", 0.25)
           .attr("d", arc);
@@ -93,6 +99,25 @@
           .attr("class", "node")
           .attr("r", 10)
           .attr("cx", d => d.x);
+
+        d3.selectAll("circle").on("mouseover", nodeOver);
+        d3.selectAll("path").on("mouseover", edgeOver);
+
+        function nodeOver(d) {
+          d3.selectAll("circle").classed("active", p => p === d);
+          d3.selectAll("path").classed(
+            "active",
+            p => p.source === d || p.target === d
+          );
+        }
+
+        function edgeOver(d) {
+          d3.selectAll("path").classed("active", p => p === d);
+
+          d3.selectAll("circle")
+            .classed("source", p => p === d.source)
+            .classed("target", p => p === d.target);
+        }
       }
     </script>
   </body>
