@@ -43,79 +43,56 @@
         PromiseWrapper("../data/nodelist.csv"),
         PromiseWrapper("../data/edgelist.csv")
       ]).then(resolve => {
-        createAdjacencyMatrix(resolve[0], resolve[1]);
+        return createArcDiagram(resolve[0], resolve[1]);
       });
 
-      function createAdjacencyMatrix(nodes, edges) {
-        var edgeHash = {};
+      function createArcDiagram(nodes, edges) {
+        var nodeHash = {};
+
+        function arc(d, i) {
+          var draw = d3.line().curve(d3.curveBasis);
+
+          var midX = (d.source.x + d.target.x) / 2;
+          var midY = d.source.x - d.target.x;
+
+          return draw([[d.source.x, 0], [midX, midY], [d.target.x, 0]]);
+        }
+
+        nodes.forEach((node, x) => {
+          nodeHash[node.id] = node;
+          node.x = parseInt(x) * 30;
+        });
 
         edges.forEach(edge => {
-          var id = edge.source + "-" + edge.target;
-          edgeHash[id] = edge;
+          edge.weight = parseInt(edge.weight);
+          edge.source = nodeHash[edge.source];
+          edge.target = nodeHash[edge.target];
         });
 
-        var matrix = [];
-        nodes.forEach((source, a) => {
-          nodes.forEach((target, b) => {
-            var grid = {
-              id: source.id + "-" + target.id,
-              x: b,
-              y: a,
-              weight: 0
-            };
-            if (edgeHash[grid.id]) {
-              grid.weight = edgeHash[grid.id].weight;
-            }
-
-            matrix.push(grid);
-          });
-        });
-
-        d3.select("svg")
+        var arcG = d3
+          .select("svg")
           .append("g")
-          .attr("transform", "translate(50,50)")
-          .attr("id", "adjancencyG")
-          .selectAll("rect")
-          .data(matrix)
+          .attr("id", "arcG")
+          .attr("transform", "translate(50,250)");
+
+        arcG
+          .selectAll("path")
+          .data(edges)
           .enter()
-          .append("rect")
-          .attr("class", "grid")
-          .attr("width", 25)
-          .attr("height", 25)
-          .attr("x", d => d.x * 25)
-          .attr("y", d => d.y * 25)
-          .style("fill-opacity", d => d.weight * 0.2);
+          .append("path")
+            .attr("class", "arc")
+          .style("stroke-width", d => d.weight * 2)
+          .style("opacity", 0.25)
+          .attr("d", arc);
 
-        d3.select("svg")
-          .append("g")
-          .attr("transform", "translate(50,45)")
-          .selectAll("text")
+        arcG
+          .selectAll("circle")
           .data(nodes)
           .enter()
-          .append("text")
-          .attr("x", (d, i) => i * 25 + 12.5)
-          .text(d => d.id)
-          .style("text-anchor", "middle");
-
-        d3.select("svg")
-          .append("g")
-          .attr("transform", "translate(45, 50)")
-          .selectAll("text")
-          .data(nodes)
-          .enter()
-          .append("text")
-          .attr("y", (d, i) => i * 25 + 12.5)
-          .text(d => d.id)
-          .style("text-anchor", "end");
-
-        d3.selectAll("rect.grid").on("mouseover", gridOver);
-        function gridOver(d) {
-          d3.selectAll("rect").style("stroke-width", p =>
-            p.x == d.x || p.y == d.y || (p.x == d.y && p.y == d.x)
-              ? "4px"
-              : "1px"
-          );
-        }
+          .append("circle")
+          .attr("class", "node")
+          .attr("r", 10)
+          .attr("cx", d => d.x);
       }
     </script>
   </body>
