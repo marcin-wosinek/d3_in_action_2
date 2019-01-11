@@ -8,34 +8,12 @@
       type="text/JavaScript"
     ></script>
     <style>
-      .grid {
-        stroke: #9a8b7a;
-        stroke-width: 1px;
-        fill: #cf7d1c;
-      }
-      .arc {
-        stroke: #9a8b7a;
-        fill: none;
-      }
       .node {
-        fill: #ebd8c1;
-        stroke: #9a8b7a;
-        stroke-width: 1px;
+        fill: #4F442B;
       }
-      text {
-        font-size: 8px;
-      }
-      circle.active {
-        fill: #fe9922;
-      }
-      path.active {
-        stroke: #fe9922;
-      }
-      circle.source {
-        fill: #93c464;
-      }
-      circle.target {
-        fill: #41a368;
+
+      .link {
+        stroke: #93C464;
       }
     </style>
   </head>
@@ -44,39 +22,88 @@
     <script>
       var roleScale = d3
         .scaleOrdinal()
+        .domain(["contractor", "employee", "manager"])
         .range(["#75739F", "#41A368", "#FE9922"]);
 
-      var sampleData = d3
-        .range(300)
-        .map((d, i) => ({ r: 2, value: 200 + d3.randomNormal()() * 50 }));
+      var PromiseWrapper = d =>
+        new Promise(resolve => d3.csv(d, p => resolve(p)));
 
-      var manyBody = d3.forceManyBody().strength(10);
-      var center = d3
-        .forceCenter()
-        .x(250)
-        .y(250);
+      Promise.all([
+        PromiseWrapper("../data/nodelist.csv"),
+        PromiseWrapper("../data/edgelist.csv")
+      ]).then(resolve => {
+        createForceLayout(resolve[0], resolve[1]);
+      });
 
-      var force = d3
-        .forceSimulation()
-        .force("collision", d3.forceCollide(d => d.r))
-        .force("x", d3.forceX(100))
-        .force("y", d3.forceY(d => d.value).strength(3))
-        .nodes(sampleData)
-        .on("tick", updateNetwork);
+      function createForceLayout(nodes, edges) {
+        var nodeHash = nodes.reduce((hash, node) => {
+          hash[node.id] = node;
+          return hash;
+        }, {});
 
-      d3.select("svg")
-        .selectAll("circle")
-        .data(sampleData)
-        .enter()
-        .append("circle")
-        .attr("class", "node")
-        .style("fill", (d, i) => roleScale(i))
-        .attr("r", d => d.r);
+        edges.forEach(edge => {
+          edge.source = nodeHash[edge.source];
+          edge.target = nodeHash[edge.target];
+        });
 
-      function updateNetwork() {
-        d3.selectAll("circle")
-          .attr("cx", d => d.x)
-          .attr("cy", d => d.y);
+        var linkForce = d3.forceLink();
+
+        function forceTick() {
+          d3.selectAll("line.link")
+            .attr("x1", d => d.source.x)
+            .attr("x2", d => d.target.x)
+            .attr("y1", d => d.source.y)
+            .attr("y2", d => d.target.y);
+
+          d3.selectAll("g.node").attr(
+            "transform",
+            d => `translate(${d.x}, ${d.y})`
+          );
+        }
+
+        var simulation = d3
+          .forceSimulation()
+          .force("charge", d3.forceManyBody().strength(-40))
+          .force(
+            "center",
+            d3
+              .forceCenter()
+              .x(300)
+              .y(300)
+          )
+          .force("link", linkForce)
+          .nodes(nodes)
+          .on("tick", forceTick);
+
+        simulation.force("link").links(edges);
+
+        d3.select("svg")
+          .selectAll("line.link")
+          .data(edges, d => `${d.source.id}-${d.target.id}`)
+          .enter()
+          .append("line")
+          .attr("class", "link")
+          .style("opacity", 0.5)
+          .style("stroke-width", d => d.weight);
+
+        var nodeEnter = d3
+          .select("svg")
+          .selectAll("g.node")
+          .data(nodes, d => d.id)
+          .enter()
+          .append("g")
+          .attr("class", "node");
+
+        nodeEnter
+          .append("circle")
+          .attr("r", 5)
+          .style("fill", d => roleScale(d.role));
+
+        nodeEnter
+          .append("text")
+          .style("text-anchor", "middle")
+          .attr("y", 15)
+          .text(d => d.id);
       }
     </script>
   </body>
