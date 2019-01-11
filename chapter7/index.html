@@ -32,92 +32,47 @@
         stroke: #fe9922;
       }
       circle.source {
-        fill: #93C464;
+        fill: #93c464;
       }
       circle.target {
-        fill: #41A368;
+        fill: #41a368;
       }
     </style>
   </head>
   <body>
     <div id="viz"><svg style="width:600px;height:600px;"></svg></div>
     <script>
-      var PromiseWrapper = d =>
-        new Promise(resolve => d3.csv(d, p => resolve(p)));
+      var roleScale = d3
+        .scaleOrdinal()
+        .range(["#75739F", "#41A368", "#FE9922"]);
 
-      Promise.all([
-        PromiseWrapper("../data/nodelist.csv"),
-        PromiseWrapper("../data/edgelist.csv")
-      ]).then(resolve => {
-        return createArcDiagram(resolve[0], resolve[1]);
-      });
+      var sampleData = d3.range(100).map((d, i) => ({ r: 50 - i * 0.5 }));
 
-      function createArcDiagram(nodes, edges) {
-        var nodeHash = {};
+      var manyBody = d3.forceManyBody().strength(10);
+      var center = d3
+        .forceCenter()
+        .x(250)
+        .y(250);
 
-        function arc(d, i) {
-          var draw = d3.line().curve(d3.curveBasis);
+      var force = d3
+        .forceSimulation()
+        .force("charge", manyBody)
+        .force("center", center)
+        .nodes(sampleData)
+        .on("tick", updateNetwork);
 
-          var midX = (d.source.x + d.target.x) / 2;
-          var midY = d.source.x - d.target.x;
+      d3.select("svg")
+        .selectAll("circle")
+        .data(sampleData)
+        .enter()
+        .append("circle")
+        .style("fill", (d, i) => roleScale(i))
+        .attr("r", d => d.r);
 
-          return draw([[d.source.x, 0], [midX, midY], [d.target.x, 0]]);
-        }
-
-        nodes.forEach((node, x) => {
-          nodeHash[node.id] = node;
-          node.x = parseInt(x) * 30;
-        });
-
-        edges.forEach(edge => {
-          edge.weight = parseInt(edge.weight);
-          edge.source = nodeHash[edge.source];
-          edge.target = nodeHash[edge.target];
-        });
-
-        var arcG = d3
-          .select("svg")
-          .append("g")
-          .attr("id", "arcG")
-          .attr("transform", "translate(50,250)");
-
-        arcG
-          .selectAll("path")
-          .data(edges)
-          .enter()
-          .append("path")
-          .attr("class", "arc")
-          .style("stroke-width", d => d.weight * 2)
-          .style("opacity", 0.25)
-          .attr("d", arc);
-
-        arcG
-          .selectAll("circle")
-          .data(nodes)
-          .enter()
-          .append("circle")
-          .attr("class", "node")
-          .attr("r", 10)
-          .attr("cx", d => d.x);
-
-        d3.selectAll("circle").on("mouseover", nodeOver);
-        d3.selectAll("path").on("mouseover", edgeOver);
-
-        function nodeOver(d) {
-          d3.selectAll("circle").classed("active", p => p === d);
-          d3.selectAll("path").classed(
-            "active",
-            p => p.source === d || p.target === d
-          );
-        }
-
-        function edgeOver(d) {
-          d3.selectAll("path").classed("active", p => p === d);
-
-          d3.selectAll("circle")
-            .classed("source", p => p === d.source)
-            .classed("target", p => p === d.target);
-        }
+      function updateNetwork() {
+        d3.selectAll("circle")
+          .attr("cx", d => d.x)
+          .attr("cy", d => d.y);
       }
     </script>
   </body>
