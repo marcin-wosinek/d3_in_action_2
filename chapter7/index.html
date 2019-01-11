@@ -58,6 +58,7 @@
         .forceSimulation()
         .force("charge", manyBody)
         .force("center", center)
+        .force('collision', d3.forceCollide(d => d.r))
         .nodes(sampleData)
         .on("tick", updateNetwork);
 
