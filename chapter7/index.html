@@ -137,6 +137,23 @@
           .attr("d", "M 0 0 12 6 0 12 3 6");
 
         d3.selectAll("line").attr("marker-end", "url(#triangle)");
+
+        var drag = d3.drag();
+
+        drag.on("drag", dragging);
+
+        function dragging(d) {
+          var e = d3.event;
+
+          d.fx = e.x;
+          d.fy = e.y;
+          if (simulation.alpha() < 0.1) {
+            simulation.alpha(0.1);
+            simulation.restart();
+          }
+        }
+
+        d3.selectAll("g.node").call(drag);
       }
     </script>
   </body>
