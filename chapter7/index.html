@@ -47,11 +47,13 @@
           edge.target = nodeHash[edge.target];
         });
 
-       nodes.forEach(d=>{
-           d.degreeCentrality=edges.filter(p=>p.source===d||p.target ===d).length;
-           });
+        nodes.forEach(d => {
+          d.degreeCentrality = edges.filter(
+            p => p.source === d || p.target === d
+          ).length;
+        });
 
-        var linkForce = d3.forceLink();
+        var linkForce = d3.forceLink().strength(d => d.weight * 0.1);
 
         function forceTick() {
           d3.selectAll("line.link")
@@ -83,14 +85,9 @@
 
         var simulation = d3
           .forceSimulation()
-          .force("charge", d3.forceManyBody().strength(-40))
-          .force(
-            "center",
-            d3
-              .forceCenter()
-              .x(300)
-              .y(300)
-          )
+          .force("charge", d3.forceManyBody().strength(-500))
+          .force("x", d3.forceX(250))
+          .force("y", d3.forceY(250))
           .force("link", linkForce)
           .nodes(nodes)
           .on("tick", forceTick);
