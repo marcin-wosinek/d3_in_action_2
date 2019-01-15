@@ -141,23 +141,46 @@
         function update() {
           simulation.stop();
 
-          var nodes = simulation.nodes();
-          var links = simulation.force("link").links();
+          var oldNodes = simulation.nodes();
+          var oldEdges = simulation.force("link").links();
 
-          var newEdge = { source: nodes[0], target: nodes[8], weight: 5 };
+          var newNode1 = { id: "Mike", role: "contractor", team: "none" },
+            newNode2 = { id: "Noah", role: "contractor", team: "none" };
 
-          links.push(newEdge);
+          var newEdge1 = { source: oldNodes[5], target: newNode1, weight: 5 },
+            newEdge2 = { source: oldNodes[5], target: newNode2, weight: 5 };
 
-          simulation.force("link").links(links);
+          oldEdges.push(newEdge1, newEdge2);
+          oldNodes.push(newNode1, newNode2);
+
+          simulation.force("link").links(oldEdges);
+          simulation.nodes(oldNodes);
 
           d3.select("svg")
             .selectAll("line.link")
-            .data(links, d => `${d.source.id}-${d.target.id}`)
+            .data(oldEdges, d => `${d.source.id}-${d.target.id}`)
             .enter()
             .insert("line", "g.node")
             .attr("class", "link")
-            .style("stroke", "#fe9922")
+            .style("stroke", "#FE9922")
             .style("stroke-width", 5);
+
+          var nodeEnter = d3
+            .select("svg")
+            .selectAll("g.node")
+            .data(oldNodes, d => d.id)
+            .enter()
+            .append("g")
+            .attr("class", "node");
+          nodeEnter
+            .append("circle")
+            .attr("r", 5)
+            .style("fill", "#FCBC34");
+          nodeEnter
+            .append("text")
+            .style("text-anchor", "middle")
+            .attr("y", 15)
+            .text(d => d.id);
 
           simulation.alpha(0.1);
           simulation.restart();
