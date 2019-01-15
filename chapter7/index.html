@@ -138,45 +138,32 @@
 
         d3.selectAll("line").attr("marker-end", "url(#triangle)");
 
-        function filterNetwork() {
+        function update() {
           simulation.stop();
 
-          var originalNodes = simulation.nodes();
-          var originalLinks = simulation.force("link").links();
+          var nodes = simulation.nodes();
+          var links = simulation.force("link").links();
 
-          var influentialNodes = originalNodes.filter(
-            d => d.role === "employee"
-          );
+          var newEdge = { source: nodes[0], target: nodes[8], weight: 5 };
 
-          var influentialLinks = originalLinks.filter(
-            d =>
-              influentialNodes.includes(d.source) &&
-              influentialNodes.includes(d.target)
-          );
+          links.push(newEdge);
 
-          d3.selectAll("g.node")
-            .data(influentialNodes, d => d.id)
-            .exit()
-            .transition()
-            .duration(4000)
-            .style("opacity", 0)
-            .remove();
+          simulation.force("link").links(links);
 
-          d3.selectAll("line.link")
-            .data(influentialLinks, d => `${d.source.id}-${d.target.id}`)
-            .exit()
-            .transition()
-            .duration(3000)
-            .style("opacity", 0)
-            .remove();
+          d3.select("svg")
+            .selectAll("line.link")
+            .data(links, d => `${d.source.id}-${d.target.id}`)
+            .enter()
+            .insert("line", "g.node")
+            .attr("class", "link")
+            .style("stroke", "#fe9922")
+            .style("stroke-width", 5);
 
-          simulation.nodes(influentialNodes);
-          simulation.force("link").links(influentialLinks);
           simulation.alpha(0.1);
           simulation.restart();
         }
 
-        d3.select("svg").on("click", filterNetwork);
+        d3.select("svg").on("click", update);
       }
     </script>
   </body>
