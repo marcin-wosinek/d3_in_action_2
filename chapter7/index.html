@@ -172,11 +172,30 @@
             .attr("x2", d => xScale(d.target.degreeCentrality))
             .attr("y2", d => yScale(d.target.salary));
 
-          var xAxis = d3.axisBottom().scale(xScale).tickSize(4);
-          var yAxis = d3.axisRight().scale(yScale).tickSize(4);
+          var xAxis = d3
+            .axisBottom()
+            .scale(xScale)
+            .tickSize(4);
+          var yAxis = d3
+            .axisRight()
+            .scale(yScale)
+            .tickSize(4);
 
-          d3.select('svg').append('g').attr('transform', 'translate(0, 460)').call(xAxis);
-          d3.select('svg').append('g').attr('transform', 'translate(460, 0)').call(yAxis);
+          d3.select("svg")
+            .append("g")
+            .attr("transform", "translate(0, 460)")
+            .call(xAxis);
+          d3.select("svg")
+            .append("g")
+            .attr("transform", "translate(460, 0)")
+            .call(yAxis);
+
+          d3.selectAll("g.node").each(d => {
+            d.x = xScale(d.degreeCentrality);
+            d.vx = 0;
+            d.y = yScale(d.salary);
+            d.vy = 0;
+          });
         }
 
         d3.select("svg").on("click", update);
