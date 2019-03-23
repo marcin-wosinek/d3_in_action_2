@@ -76,6 +76,19 @@
 
         var countryColor = d3.scaleQuantize().domain(featureSize).range(colorbrewer.Reds[7]);
 
+        var graticule = d3.geoGraticule();
+        d3.select('svg')
+          .insert('path', 'path.countries')
+          .datum(graticule)
+          .attr('class', 'graticule line')
+          .attr('d', geoPath);
+
+        d3.select('svg')
+          .insert('path', 'path.countries')
+          .datum(graticule.outline)
+          .attr('class', 'graticule outline')
+          .attr('d', geoPath);
+
         d3.select('svg')
           .selectAll('path')
           .data(countries.features)
