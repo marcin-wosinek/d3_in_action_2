@@ -87,6 +87,35 @@
 
         }
 
+        function zoomButton(zoomDirection) {
+          var width = 500
+          var height = 500
+
+          if (zoomDirection == 'in') {
+            var newZoom = projection.scale() * 1.5;
+            var newX = ((projection.translate()[0] - (width / 2)) * 1.5)+width / 2;
+            var newY = ((projection.translate()[1] - (height / 2)) * 1.5)+height / 2;
+          }
+
+          if (zoomDirection == 'out') {
+            var newZoom = projection.scale() * .75;
+            var newX = ((projection.translate()[0] - (width / 2)) * 0.75)+width / 2;
+            var newY = ((projection.translate()[1] - (height / 2)) * 0.75)+height / 2;
+          }
+
+          var newZoomSettinsg = d3.zoomIdentity.translate(newX, newY).scale(newZoom);
+
+          d3.select('svg').transition().duration(500).call(mapZoom.transform, newZoomSettinsg);
+        }
+
+        d3.select('#controls').append('button').on('click', () => {
+            zoomButton('in');
+        }).html('zoom in');
+
+        d3.select('#controls').append('button').on('click', () => {
+            zoomButton('out');
+        }).html('zoom out');
+
         var geoPath = d3.geoPath().projection(projection);
 
         var featureSize = d3.extent(countries.features, d => geoPath.area(d));
