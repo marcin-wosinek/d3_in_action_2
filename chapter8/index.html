@@ -71,20 +71,37 @@
 
         var mapZoom = d3.zoom().on('zoom', zoomed);
 
-        var zoomSettings = d3.zoomIdentity.translate(250, 250).scale(120);
+        var zoomSettings = d3.zoomIdentity.translate(0, 0).scale(200);
+        var rotateScale = d3.scaleLinear().domain([-500, 0, 500]).range([-180, 0, 180]);
 
         d3.select('svg').call(mapZoom).call(mapZoom.transform, zoomSettings);
 
         function zoomed() {
           var e = d3.event;
 
-          projection.translate([e.transform.x, e.transform.y]).scale(e.transform.k);
+          var currentRotate = rotateScale(e.transform.x) % 360;
+          projection.rotate([currentRotate, 0]);
 
           d3.selectAll('path.graticule').attr('d', geoPath);
-          d3.selectAll('path.countries').attr('d', geoPath);
+          d3.selectAll('path.countries')
+            .attr('d', geoPath)
+            .style('fill', d => countryColor(geoPath.area(d)))
+            .style('stroke', d => d3.rgb(countryColor(geoPath.area(d))).darker());
+
           d3.selectAll('circle.cities')
-            .attr('cx', d=>projection([d.x, d.y])[0])
-            .attr('cy', d=>projection([d.x, d.y])[1]);
+            .each(function(d, i) {
+                var projectedPoint = projection([d.x,d.y]);
+                var x = parseInt(d.x);
+
+                var display = (x + currentRotate < 90 && x + currentRotate > -90) ||
+                  (x + currentRotate < -270 && x + currentRotate > -450) ||
+                  (x + currentRotate > 270 && x + currentRotate < 450) ? "block" : 'none';
+
+                d3.select(this)
+                  .style('display', display)
+                  .attr('cx', projectedPoint[0])
+                  .attr('cy', projectedPoint[1]);
+            })
 
         }
 
