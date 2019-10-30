@@ -68,6 +68,25 @@
           .scale(120)
           .translate([250, 250]);
 
+        var mapZoom = d3.zoom().on('zoom', zoomed);
+
+        var zoomSettings = d3.zoomIdentity.translate(250, 250).scale(120);
+
+        d3.select('svg').call(mapZoom).call(mapZoom.transform, zoomSettings);
+
+        function zoomed() {
+          var e = d3.event;
+
+          projection.translate([e.transform.x, e.transform.y]).scale(e.transform.k);
+
+          d3.selectAll('path.graticule').attr('d', geoPath);
+          d3.selectAll('path.countries').attr('d', geoPath);
+          d3.selectAll('circle.cities')
+            .attr('cx', d=>projection([d.x, d.y])[0])
+            .attr('cy', d=>projection([d.x, d.y])[1]);
+
+        }
+
         var geoPath = d3.geoPath().projection(projection);
 
         var featureSize = d3.extent(countries.features, d => geoPath.area(d));
