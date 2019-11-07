@@ -85,8 +85,11 @@
           d3.selectAll('path.graticule').attr('d', geoPath);
           d3.selectAll('path.countries')
             .attr('d', geoPath)
-            .style('fill', d => countryColor(geoPath.area(d)))
-            .style('stroke', d => d3.rgb(countryColor(geoPath.area(d))).darker());
+            .style('fill', d => newFeatureColor(geoPath.geoArea(d)))
+            .style('stroke', d => d3.rgb(newFeatureColor(geoPath.geoArea(d))).darker());
+          d3.select("svg")
+            .selectAll("path")
+            .style("fill", d => newFeatureColor(geoPath.area(d)));
 
           d3.selectAll('circle.cities')
             .each(function(d, i) {
@@ -152,6 +155,18 @@
           .attr("class", "countries")
           .style("fill", d => countryColor(geoPath.area(d)))
           .style("stroke", d => d3.rgb(countryColor(geoPath.area(d))).darker());
+
+        var featureData = d3.selectAll('path.countries').data();
+        var realFeatureSize = d3.extent(countries.features, d => geoPath.area(d));
+
+        var newFeatureColor = d3
+          .scaleQuantize()
+          .domain(realFeatureSize)
+          .range(colorbrewer.Reds[7]);
+
+        d3.select("svg")
+          .selectAll("path")
+          .style("fill", d => newFeatureColor(geoPath.geoArea(d)));
 
         d3.select("svg")
           .selectAll("circle")
