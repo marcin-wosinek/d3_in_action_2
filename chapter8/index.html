@@ -64,10 +64,13 @@
 
       function createMap(countries, cities) {
         var projection = d3
-          .geoOrthographic()
-          .scale(200)
+          .geoSatellite()
+          .scale(1330)
           .translate([250, 250])
-          .center([0, 0]);
+          .rotate([-30.24, -31, -56])
+          .tilt(30)
+          .distance(1.199)
+          .clipAngle(45);
 
         var mapZoom = d3.zoom().on('zoom', zoomed);
 
@@ -77,35 +80,6 @@
         d3.select('svg').call(mapZoom).call(mapZoom.transform, zoomSettings);
 
         function zoomed() {
-          var e = d3.event;
-
-          var currentRotate = rotateScale(e.transform.x) % 360;
-          projection.rotate([currentRotate, 0]);
-
-          d3.selectAll('path.graticule').attr('d', geoPath);
-          d3.selectAll('path.countries')
-            .attr('d', geoPath)
-            .style('fill', d => newFeatureColor(geoPath.geoArea(d)))
-            .style('stroke', d => d3.rgb(newFeatureColor(geoPath.geoArea(d))).darker());
-          d3.select("svg")
-            .selectAll("path")
-            .style("fill", d => newFeatureColor(geoPath.area(d)));
-
-          d3.selectAll('circle.cities')
-            .each(function(d, i) {
-                var projectedPoint = projection([d.x,d.y]);
-                var x = parseInt(d.x);
-
-                var display = (x + currentRotate < 90 && x + currentRotate > -90) ||
-                  (x + currentRotate < -270 && x + currentRotate > -450) ||
-                  (x + currentRotate > 270 && x + currentRotate < 450) ? "block" : 'none';
-
-                d3.select(this)
-                  .style('display', display)
-                  .attr('cx', projectedPoint[0])
-                  .attr('cy', projectedPoint[1]);
-            })
-
         }
 
         function zoomButton(zoomDirection) {
@@ -163,10 +137,6 @@
           .scaleQuantize()
           .domain(realFeatureSize)
           .range(colorbrewer.Reds[7]);
-
-        d3.select("svg")
-          .selectAll("path")
-          .style("fill", d => newFeatureColor(geoPath.geoArea(d)));
 
         d3.select("svg")
           .selectAll("circle")
